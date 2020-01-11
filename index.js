@@ -206,20 +206,29 @@ module.exports = function Debug(mod) {
 			let symbol = flags.fake ? '*' : flags.silenced ? 'X' : '-'
 			symbol = flags.incoming ? `<${symbol}` : `${symbol}>`
 
+			let parsed = null,
+				badDef = false
+
+			if(defs)
+				try {
+					parsed = mod.parse(pkt.code, defVersion, pkt.data)
+					badDef = mod.packetLength(pkt.code, defVersion, parsed) !== pkt.data.length
+				}
+				catch(e) { badDef = true }
+
 			write(
-`[${timestampNow()}] ${symbol} ${name || pkt.code}${defs ? `.${defVersion}` : ''}
+`[${timestampNow()}] ${symbol} ${name || pkt.code}${defs ? `.${defVersion}` : ''}${badDef ? ' (bad def)' : ''}
 ${pkt.data.slice(0, 4).toString('hex')}${pkt.data.length > 4 ? ` ${pkt.data.slice(4).toString('hex')}` : ''}`
 			)
 
-			if(defs) {
+			if(parsed) {
 				const defaultBigIntToJSON = BigInt.prototype.toJSON,
 					defaultBufferToJSON = Buffer.prototype.toJSON
 				BigInt.prototype.toJSON = function() { return this.toString() }
 				Buffer.prototype.toJSON = function() { return this.toString('hex') }
-				try {
-					write(JSON.stringify(mod.parse(pkt.code, defVersion, pkt.data)))
-				}
-				catch(e) {}
+
+				try { write(JSON.stringify(parsed)) } catch(e) {}
+
 				BigInt.prototype.toJSON = defaultBigIntToJSON
 				Buffer.prototype.toJSON = defaultBufferToJSON
 			}
