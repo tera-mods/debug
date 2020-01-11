@@ -1,5 +1,6 @@
 {
 	"name": "debug",
+	"update": "github:tera-mods/debug",
 	"reloadable": true,
 	"title": "Debug",
 	"author": "Pinkie Pie",
