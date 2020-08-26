@@ -171,7 +171,7 @@ module.exports = function Debug(mod) {
 					writePacket(origPacket, {
 						incoming: data.$incoming,
 						fake: false,
-						silenced: data.$modified
+						silenced: data.$silenced
 					})
 
 				if(data.$modified && !data.$silenced) // We probably don't ever need to log fake silenced packets
